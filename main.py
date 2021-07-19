@@ -1,9 +1,10 @@
-# .env ファイルをロードして環境変数へ反映
-from dotenv import load_dotenv
-load_dotenv()
+#!/usr/bin/env python
 
-# 環境変数を参照
-import os
-GOOGLE_OAUTH_CLIENT_ID = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+from google_calendar import GoogleCalendar
 
-print(GOOGLE_OAUTH_CLIENT_ID)
+def main():
+    google_calendar = GoogleCalendar()
+    google_calendar.get_events()
+
+if __name__ == '__main__':
+    main()
