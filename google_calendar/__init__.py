@@ -54,10 +54,9 @@ class GoogleCalendar:
         events = events_result.get('items', [])
 
         if not events:
-            print('No upcoming events found.')
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
+            print('events not found.')
+        # print(events)
+        return events
 
 def get_events():
     """Shows basic usage of the Google Calendar API.
