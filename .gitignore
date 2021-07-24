@@ -47,7 +47,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
+*.py,coverkkkk
 .hypothesis/
 .pytest_cache/
 
@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 workspace.code-workspace
 oauth/
+Fonts/
