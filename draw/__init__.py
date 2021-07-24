@@ -1,3 +1,4 @@
+import pytz
 import calendar as cal
 from datetime import date, datetime
 from dateutil.parser import parse
@@ -13,7 +14,7 @@ MAIN_WIDTH = 560
 
 FONTS = dict(
     en='./Fonts/Marcellus-Regular.ttf',
-    ja='./Fonts/NotoSansJP-Regular.otf',
+    ja='./Fonts/NotoSansJP-Bold.otf',
     num='./Fonts/Cardo-Regular.ttf',
     title='./Fonts/PinyonScript-Regular.ttf',
     number='./Fonts/Krungthep.ttf',
@@ -26,15 +27,13 @@ COLORS = dict(
     white=(255, 255, 255)
 )
 
+LOCALE = 'Asia/Tokyo'
+
+WEEKDAY = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+
 def get_calendar(year: int, month: int):
     month_dates = cal.Calendar(cal.SUNDAY).monthdatescalendar(year, month)
     return month_dates
-    # calendar_eu = cal.monthcalendar(year, month)
-    # print(calendar_eu)
-    # # print(cal.prmonth(year, month))
-    # formatted = [0]+list(itertools.chain.from_iterable(calendar_eu))[:-1]
-    # print(np.array(formatted).reshape(-1, 7).tolist())
-    # return np.array(formatted).reshape(-1, 7).tolist()
 
 class Draw:
     img: Image.Image
@@ -58,7 +57,16 @@ class Draw:
         )
         width = bbox[2] - bbox[0]
         height = bbox[3] - bbox[1]
-        return (width, height)
+        return width, height
+    # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textsize
+    def get_textsize(self, text: str, font_name: str, font_size: int) -> Tuple[Width, Height]:
+        textsize = self.draw.multiline_textsize(
+            text,
+            font = self.get_font(font_name, font_size)
+        )
+        width = textsize[0]
+        height = textsize[1]
+        return width, height
 
     def padding_width(self, width: int, text: str, font_name: str, font_size: int):
         rect = self.get_rect(text, font_name, font_size)
@@ -66,7 +74,8 @@ class Draw:
 
     def padding_height(self, height: int, text: str, font_name: str, font_size: int):
         rect = self.get_rect(text, font_name, font_size)
-        return (height - rect[1]) // 2
+        textsize = self.get_textsize(text, font_name, font_size)
+        return (height - rect[1] + textsize[1]) // 2
 
     def save_image(self, file_name: str = 'text'):
         file_path = f'./{file_name}.bmp'
@@ -149,40 +158,63 @@ class Draw:
 
     def draw_schedules(self, schedules):
         h_schedule = (SIZE[1] - 20) // 10
-        print(h_schedule)
+        font_size = 15
         for i, schedule in enumerate(schedules):
-            s_name: str = schedule['summary']
-            s_datetime: datetime = parse(schedule['start'].get('dateTime', schedule['start'].get('date')))
+            s_name: str = schedule['name']
+            s_datetime: datetime = schedule['datetime']
+            s_datetime = s_datetime.astimezone(pytz.timezone(LOCALE))
             if s_name is None or s_datetime is None:
                 continue
-            s_date = s_datetime.strftime('%m/%d')
-            h_pad = self.padding_height(h_schedule, s_date, 'number', 16)
-            self.draw.multiline_text(
-                (10, 10 + h_pad + (h_schedule * i) + 1),
-                s_date,
-                font = self.get_font('number', 16),
-                fill = COLORS['black']
-            )
+            
+            # draw date
+            # if i > 0:
+            prev_schedule_datetime: datetime = schedules[i - 1]['datetime']
+            is_same_date = s_datetime.strftime('%m/%d') == prev_schedule_datetime.astimezone(pytz.timezone(LOCALE)).strftime('%m/%d')
+            if not is_same_date:
+                s_date = s_datetime.strftime('%m/%d')
+                h_pad = self.padding_height(h_schedule, s_date, 'number', font_size)
+                self.draw.multiline_text(
+                    (10, 10 + h_pad + (h_schedule * i) + 1),
+                    s_date,
+                    font = self.get_font('number', font_size),
+                    anchor = 'lm',
+                    fill = COLORS['black']
+                )
+
+            # draw time
             s_time = s_datetime.strftime('%H:%M')
-            h_pad = self.padding_height(h_schedule, s_time, 'number', 16)
+            h_pad = self.padding_height(h_schedule, s_time, 'number', font_size)
+            rect = self.get_rect(s_time, 'number', font_size)
             self.draw.multiline_text(
                 (70, 10 + h_pad + (h_schedule * i)),
                 s_time,
-                font = self.get_font('number', 16),
-                fill = COLORS['black']
+                font = self.get_font('number', font_size),
+                anchor = 'lm',
+                fill = COLORS['black'],
             )
-            lines = self.convert_multiline_text(s_name, 'ja', 16, MAIN_WIDTH - 120)
-            text = str('\n'.join(lines[:3]))
-            h_pad = self.padding_height(h_schedule, text, 'ja', 16)
-            self.draw.multiline_text(
-                (130, 10 + h_pad + (h_schedule * i)),
-                text,
-                font = self.get_font('ja', 16),
-                fill = COLORS['black']
-            )
-            
-        
 
+            # draw line for date
+            line_start = 10 + (h_pad // 2) + (h_schedule * i)
+            line_end = line_start + rect[1] + (h_pad // 2)
+            if is_same_date:
+                line_start = line_start - (h_schedule // 2)
+            self.draw.line(
+                ((126, line_start), (126, line_end)),
+                fill = COLORS['black'],
+                width = 1,
+            )
+
+            # draw schedule title
+            lines = self.convert_multiline_text(s_name, 'ja', font_size, MAIN_WIDTH - 120)
+            text = str('\n'.join(lines[:3]))
+            h_pad = self.padding_height(h_schedule, text, 'ja', font_size)
+            self.draw.multiline_text(
+                (140, 10 + h_pad + (h_schedule * i)),
+                text,
+                font = self.get_font('ja', font_size),
+                anchor = 'lm',
+                fill = COLORS['black']
+            )
 
     def draw_separate_line(self):
         self.draw.line(

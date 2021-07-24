@@ -1,6 +1,8 @@
 from __future__ import print_function
 import datetime
 import os.path
+import pytz
+from dateutil import parser
 from posixpath import join
 from googleapiclient.discovery import Resource, build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -56,7 +58,12 @@ class GoogleCalendar:
         if not events:
             print('events not found.')
         # print(events)
-        return events
+        def toEntity(event):
+            return {
+                'name': event['summary'],
+                'datetime': parser.parse(event['start'].get('dateTime', event['start'].get('date'))).astimezone(pytz.timezone('UTC'))
+            }
+        return list(map(toEntity,events))
 
 def get_events():
     """Shows basic usage of the Google Calendar API.
