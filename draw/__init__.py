@@ -37,13 +37,17 @@ def get_calendar(year: int, month: int):
 
 class Draw:
     img: Image.Image
+    img_red: Image.Image
     draw: ImageDraw.ImageDraw
+    draw_red: ImageDraw.ImageDraw
     today: date
 
     def __init__(self):
         # create a new image
         self.img = Image.new('RGB', SIZE, COLORS['white'])
+        self.img_red = Image.new('RGB', SIZE, COLORS['white'])
         self.draw = ImageDraw.Draw(self.img)
+        self.draw_red = ImageDraw.Draw(self.img_red)
         self.today = date.today()
 
     def get_font(self, name: str, size: int):
