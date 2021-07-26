@@ -10,7 +10,7 @@ Width, Height = int, int
 
 # image size
 SIZE = (800, 480)
-MAIN_WIDTH = 560
+MAIN_WIDTH = 334
 
 FONTS = dict(
     en='./Fonts/Marcellus-Regular.ttf',
@@ -120,24 +120,26 @@ class Draw:
         # calendar = get_calendar(2018, 12)
 
         month_size = 12
-        month_padding = self.padding_width(SIZE[0] - MAIN_WIDTH, self.today.strftime("%B"), 'number', month_size)
+        wrap_padding = 5
+        draw_width = MAIN_WIDTH - wrap_padding * 2
+        month_padding = self.padding_width(draw_width, self.today.strftime("%B"), 'number', month_size)
         self.draw_black.multiline_text(
-            (MAIN_WIDTH + month_padding, 32 + 30 * 7),
+            (month_padding + wrap_padding, 32 + 30 * 7),
             self.today.strftime("%B"),
             fill = COLORS['black'],
             font = self.get_font('number', month_size),
         )
         month_size = 20
-        month_padding = self.padding_width(SIZE[0] - MAIN_WIDTH, str(self.today.month), 'number', month_size)
+        month_padding = self.padding_width(draw_width, str(self.today.month), 'number', month_size)
         self.draw_black.multiline_text(
-            (MAIN_WIDTH + month_padding, 12 + 30 * 7),
+            (month_padding + wrap_padding, 12 + 30 * 7),
             str(self.today.month),
             fill = COLORS['black'],
             font = self.get_font('number', month_size),
         )
 
-        w_day = (SIZE[0] - MAIN_WIDTH) // 7
-        x_start: np.ndarray = np.arange(7) * w_day + MAIN_WIDTH
+        w_day = draw_width // 7
+        x_start: np.ndarray = np.arange(7) * w_day
         weekday_s = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
         for i, text in enumerate(weekday_s):
@@ -145,7 +147,7 @@ class Draw:
             color = COLORS['red'] if i == 0 else COLORS['black']
             draw = self.draw_red if i == 0 else self.draw_black
             draw.multiline_text(
-                (x_start[i] + w_pad, 270),
+                (x_start[i] + w_pad + wrap_padding, 270),
                 text,
                 font = self.get_font('number', 12),
                 fill = color,
@@ -168,7 +170,7 @@ class Draw:
                     draw = self.draw_black
                 # color = COLOR['red'] if i == 0 or text in holidays else COLOR['black']
                 draw.multiline_text(
-                    (x_start[i] + w_pad, 300 + 30 * h),
+                    (x_start[i] + w_pad + wrap_padding, 300 + 30 * h),
                     str(text),
                     font = self.get_font('number', 16),
                     fill = color
@@ -238,20 +240,5 @@ class Draw:
         self.draw_black.line(
             ((MAIN_WIDTH, 0), (MAIN_WIDTH, SIZE[1])),
             fill = COLORS['black'],
-            width = 1,
-        )
-        self.draw_black.line(
-            ((MAIN_WIDTH + 2, 0), (MAIN_WIDTH + 2, SIZE[1])),
-            fill = COLORS['black'],
-            width = 1,
-        )
-        self.draw_black.line(
-            ((MAIN_WIDTH, 6 + 30 * 7), (SIZE[0], 6 + 30 * 7)),
-            fill = COLORS['black'],
-            width = 1,
-        )
-        self.draw_black.line(
-            ((MAIN_WIDTH, 8 + 30 * 7), (SIZE[0], 8 + 30 * 7)),
-            fill = COLORS['black'],
-            width = 1,
+            width = 2,
         )
