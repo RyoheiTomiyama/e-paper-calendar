@@ -36,26 +36,27 @@ def get_calendar(year: int, month: int):
     return month_dates
 
 class Draw:
-    img: Image.Image
+    # EPDで描画するときに、黒と赤を別画像から描画するので、2色の画像を用意する
+    # def display(self, imageblack, imagered):
+    img_black: Image.Image
     img_red: Image.Image
-    draw: ImageDraw.ImageDraw
+    draw_black: ImageDraw.ImageDraw
     draw_red: ImageDraw.ImageDraw
     today: date
 
     def __init__(self):
         # create a new image
-        self.img = Image.new('RGB', SIZE, COLORS['white'])
+        self.img_black = Image.new('RGB', SIZE, COLORS['white'])
         self.img_red = Image.new('RGB', SIZE, COLORS['white'])
-        self.draw = ImageDraw.Draw(self.img)
+        self.draw_black = ImageDraw.Draw(self.img_black)
         self.draw_red = ImageDraw.Draw(self.img_red)
         self.today = date.today()
 
     def get_font(self, name: str, size: int):
-        self.img
         return ImageFont.truetype(FONTS[name], size)
 
     def get_rect(self, text: str, font_name: str, font_size: int) -> Tuple[Width, Height]:
-        bbox = self.draw.multiline_textbbox(
+        bbox = self.draw_black.multiline_textbbox(
             (0, 0), text,  
             font = self.get_font(font_name, font_size)
         )
@@ -64,7 +65,7 @@ class Draw:
         return width, height
     # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html#PIL.ImageDraw.ImageDraw.textsize
     def get_textsize(self, text: str, font_name: str, font_size: int) -> Tuple[Width, Height]:
-        textsize = self.draw.multiline_textsize(
+        textsize = self.draw_black.multiline_textsize(
             text,
             font = self.get_font(font_name, font_size)
         )
@@ -82,8 +83,17 @@ class Draw:
         return (height - rect[1] + textsize[1]) // 2
 
     def save_image(self, file_name: str = 'text'):
+        saved_image = Image.new('RGB', SIZE, COLORS['white'])
+        for x in range(SIZE[0]):
+            for y in range(SIZE[1]):
+                pixel_black = self.img_black.getpixel((x, y))
+                pixel_red = self.img_red.getpixel((x, y))
+                if pixel_black[0] != 255 or pixel_black[1] != 255 or pixel_black[2] != 255:
+                    saved_image.putpixel((x, y), pixel_black)
+                if pixel_red[0] != 255 or pixel_red[1] != 255 or pixel_red[2] != 255:
+                    saved_image.putpixel((x, y), pixel_red)
         file_path = f'./{file_name}.bmp'
-        self.img.save(file_path, 'bmp')
+        saved_image.save(file_path, 'bmp')
     
     def convert_multiline_text(self, text: str, font_name: str, font_size: int, width):
         lines: List[str] = []
@@ -104,14 +114,14 @@ class Draw:
         return lines
 
     def draw_monthly_calendar(self):
-        if not self.draw:
+        if not self.draw_black or not self.draw_red:
             return
         calendar = get_calendar(self.today.year, self.today.month)
         # calendar = get_calendar(2018, 12)
 
         month_size = 12
         month_padding = self.padding_width(SIZE[0] - MAIN_WIDTH, self.today.strftime("%B"), 'number', month_size)
-        self.draw.multiline_text(
+        self.draw_black.multiline_text(
             (MAIN_WIDTH + month_padding, 32 + 30 * 7),
             self.today.strftime("%B"),
             fill = COLORS['black'],
@@ -119,7 +129,7 @@ class Draw:
         )
         month_size = 20
         month_padding = self.padding_width(SIZE[0] - MAIN_WIDTH, str(self.today.month), 'number', month_size)
-        self.draw.multiline_text(
+        self.draw_black.multiline_text(
             (MAIN_WIDTH + month_padding, 12 + 30 * 7),
             str(self.today.month),
             fill = COLORS['black'],
@@ -133,7 +143,8 @@ class Draw:
         for i, text in enumerate(weekday_s):
             w_pad = self.padding_width(w_day, text, 'number', 12)
             color = COLORS['red'] if i == 0 else COLORS['black']
-            self.draw.multiline_text(
+            draw = self.draw_red if i == 0 else self.draw_black
+            draw.multiline_text(
                 (x_start[i] + w_pad, 270),
                 text,
                 font = self.get_font('number', 12),
@@ -148,12 +159,15 @@ class Draw:
                     continue
                 w_pad = self.padding_width(w_day, str(text), 'number', 16)
                 color = COLORS['black']
+                draw = self.draw_black
                 if i == 0:
                     color = COLORS['red']
+                    draw = self.draw_red
                 if d.month is not self.today.month:
                     color = (160, 160, 160) 
+                    draw = self.draw_black
                 # color = COLOR['red'] if i == 0 or text in holidays else COLOR['black']
-                self.draw.multiline_text(
+                draw.multiline_text(
                     (x_start[i] + w_pad, 300 + 30 * h),
                     str(text),
                     font = self.get_font('number', 16),
@@ -177,7 +191,7 @@ class Draw:
             if not is_same_date:
                 s_date = s_datetime.strftime('%m/%d')
                 h_pad = self.padding_height(h_schedule, s_date, 'number', font_size)
-                self.draw.multiline_text(
+                self.draw_black.multiline_text(
                     (10, 10 + h_pad + (h_schedule * i) + 1),
                     s_date,
                     font = self.get_font('number', font_size),
@@ -189,7 +203,7 @@ class Draw:
             s_time = s_datetime.strftime('%H:%M')
             h_pad = self.padding_height(h_schedule, s_time, 'number', font_size)
             rect = self.get_rect(s_time, 'number', font_size)
-            self.draw.multiline_text(
+            self.draw_black.multiline_text(
                 (70, 10 + h_pad + (h_schedule * i)),
                 s_time,
                 font = self.get_font('number', font_size),
@@ -202,7 +216,7 @@ class Draw:
             line_end = line_start + rect[1] + (h_pad // 2)
             if is_same_date:
                 line_start = line_start - (h_schedule // 2)
-            self.draw.line(
+            self.draw_black.line(
                 ((126, line_start), (126, line_end)),
                 fill = COLORS['black'],
                 width = 1,
@@ -212,7 +226,7 @@ class Draw:
             lines = self.convert_multiline_text(s_name, 'ja', font_size, MAIN_WIDTH - 120)
             text = str('\n'.join(lines[:3]))
             h_pad = self.padding_height(h_schedule, text, 'ja', font_size)
-            self.draw.multiline_text(
+            self.draw_black.multiline_text(
                 (140, 10 + h_pad + (h_schedule * i)),
                 text,
                 font = self.get_font('ja', font_size),
@@ -221,22 +235,22 @@ class Draw:
             )
 
     def draw_separate_line(self):
-        self.draw.line(
+        self.draw_black.line(
             ((MAIN_WIDTH, 0), (MAIN_WIDTH, SIZE[1])),
             fill = COLORS['black'],
             width = 1,
         )
-        self.draw.line(
+        self.draw_black.line(
             ((MAIN_WIDTH + 2, 0), (MAIN_WIDTH + 2, SIZE[1])),
             fill = COLORS['black'],
             width = 1,
         )
-        self.draw.line(
+        self.draw_black.line(
             ((MAIN_WIDTH, 6 + 30 * 7), (SIZE[0], 6 + 30 * 7)),
             fill = COLORS['black'],
             width = 1,
         )
-        self.draw.line(
+        self.draw_black.line(
             ((MAIN_WIDTH, 8 + 30 * 7), (SIZE[0], 8 + 30 * 7)),
             fill = COLORS['black'],
             width = 1,
