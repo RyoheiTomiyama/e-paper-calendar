@@ -177,7 +177,8 @@ class Draw:
                 )
 
     def draw_schedules(self, schedules):
-        h_schedule = (SIZE[1] - 20) // 10
+        wrap_padding = 5
+        h_schedule = (SIZE[1] - wrap_padding * 2) // 10
         font_size = 15
         for i, schedule in enumerate(schedules):
             s_name: str = schedule['name']
@@ -194,7 +195,7 @@ class Draw:
                 s_date = s_datetime.strftime('%m/%d')
                 h_pad = self.padding_height(h_schedule, s_date, 'number', font_size)
                 self.draw_black.multiline_text(
-                    (10, 10 + h_pad + (h_schedule * i) + 1),
+                    (10 + MAIN_WIDTH, wrap_padding + h_pad + (h_schedule * i) + 1),
                     s_date,
                     font = self.get_font('number', font_size),
                     anchor = 'lm',
@@ -206,7 +207,7 @@ class Draw:
             h_pad = self.padding_height(h_schedule, s_time, 'number', font_size)
             rect = self.get_rect(s_time, 'number', font_size)
             self.draw_black.multiline_text(
-                (70, 10 + h_pad + (h_schedule * i)),
+                (70 + MAIN_WIDTH, wrap_padding + h_pad + (h_schedule * i)),
                 s_time,
                 font = self.get_font('number', font_size),
                 anchor = 'lm',
@@ -214,22 +215,22 @@ class Draw:
             )
 
             # draw line for date
-            line_start = 10 + (h_pad // 2) + (h_schedule * i)
+            line_start = wrap_padding + (h_pad // 2) + (h_schedule * i)
             line_end = line_start + rect[1] + (h_pad // 2)
             if is_same_date:
                 line_start = line_start - (h_schedule // 2)
             self.draw_black.line(
-                ((126, line_start), (126, line_end)),
+                ((126 + MAIN_WIDTH, line_start), (126 + MAIN_WIDTH, line_end)),
                 fill = COLORS['black'],
                 width = 1,
             )
 
             # draw schedule title
-            lines = self.convert_multiline_text(s_name, 'ja', font_size, MAIN_WIDTH - 120)
+            lines = self.convert_multiline_text(s_name, 'ja', font_size, SIZE[0] - MAIN_WIDTH)
             text = str('\n'.join(lines[:3]))
             h_pad = self.padding_height(h_schedule, text, 'ja', font_size)
             self.draw_black.multiline_text(
-                (140, 10 + h_pad + (h_schedule * i)),
+                (140 + MAIN_WIDTH, wrap_padding + h_pad + (h_schedule * i)),
                 text,
                 font = self.get_font('ja', font_size),
                 anchor = 'lm',
