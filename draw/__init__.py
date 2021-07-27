@@ -236,6 +236,50 @@ class Draw:
                 anchor = 'lm',
                 fill = COLORS['black']
             )
+    
+    def draw_today(self):
+        wrap_padding = 5
+
+        month_text = str(self.today.month) + '/'
+        month_font_name = 'number'
+        month_font_size = 24
+        self.draw_black.multiline_text(
+            (wrap_padding + 5, wrap_padding + 8),
+            month_text,
+            font = self.get_font(month_font_name, month_font_size),
+            fill = COLORS['black']
+        )
+        month_textsize = self.get_textsize(month_text, month_font_name, month_font_size)
+        day_text = str(self.today.day)
+        day_font_name = 'number'
+        day_font_size = 50
+        self.draw_black.multiline_text(
+            (month_textsize[0] + 10, wrap_padding),
+            day_text,
+            font = self.get_font(day_font_name, day_font_size),
+            fill = COLORS['black']
+        )
+        day_textsize = self.get_textsize(day_text, day_font_name, day_font_size)
+        week_text = WEEKDAY[self.today.weekday()]
+        week_font_name = 'number'
+        week_font_size = 24
+        self.draw_black.multiline_text(
+            (month_textsize[0] + day_textsize[0] + 15, wrap_padding + 26),
+            week_text,
+            font = self.get_font(week_font_name, week_font_size),
+            fill = COLORS['black']
+        )
+    
+    def draw_weather(self):
+        font_name = 'number'
+        temp_text = '28°'
+        temp_font_size = 80
+        self.draw_black.multiline_text(
+            (175, 88),
+            temp_text,
+            font = self.get_font(font_name, temp_font_size),
+            fill = COLORS['black'],
+        )
 
     def draw_separate_line(self):
         self.draw_black.line(

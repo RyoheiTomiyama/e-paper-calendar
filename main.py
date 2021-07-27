@@ -12,6 +12,8 @@ def main():
     draw.draw_separate_line()
     draw.draw_monthly_calendar()
     draw.draw_schedules(events)
+    draw.draw_today()
+    draw.draw_weather()
     # draw.save_image()
     output_epaper(draw.img, draw.img_red)
 
