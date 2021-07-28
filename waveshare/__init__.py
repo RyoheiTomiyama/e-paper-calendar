@@ -20,7 +20,8 @@ def output_epaper(image_black: Image.Image, image_red: Image.Image):
   try:
 
       epd = EPD()
-      epd.init()
+      if epd.is_busy() == 0:
+        epd.init()
       epd.Clear()
 
       epd.display(epd.getbuffer(image_black),epd.getbuffer(image_red))
