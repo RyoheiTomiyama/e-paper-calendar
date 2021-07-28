@@ -15,7 +15,7 @@ def main():
     draw.draw_today()
     draw.draw_weather()
     # draw.save_image()
-    output_epaper(draw.img, draw.img_red)
+    output_epaper(draw.img_black, draw.img_red)
 
 
 if __name__ == '__main__':
