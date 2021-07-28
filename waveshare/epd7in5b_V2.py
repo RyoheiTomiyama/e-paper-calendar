@@ -65,16 +65,16 @@ class EPD:
         epdconfig.spi_writebyte([data])
         epdconfig.digital_write(self.cs_pin, 1)
          
-    def is_busy(self):
-        return epdconfig.digital_read(self.busy_pin)
+    def is_ready(self):
+        return epdconfig.is_ready()
 
     def ReadBusy(self):
         logging.debug("e-Paper busy")
         self.send_command(0x71)
-        busy = self.is_busy()
+        busy = epdconfig.digital_read(self.busy_pin)
         while(busy == 0):
             self.send_command(0x71)
-            busy = self.is_busy()
+            busy = epdconfig.digital_read(self.busy_pin)
         epdconfig.delay_ms(200)
         logging.debug("e-Paper busy release")
         

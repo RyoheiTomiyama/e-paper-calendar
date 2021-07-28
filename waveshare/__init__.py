@@ -20,7 +20,7 @@ def output_epaper(image_black: Image.Image, image_red: Image.Image):
   try:
 
       epd = EPD()
-      if epd.is_busy() == 0:
+      if not epd.is_ready():
         epd.init()
       epd.Clear()
 

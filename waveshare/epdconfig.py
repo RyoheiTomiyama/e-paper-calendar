@@ -61,6 +61,10 @@ class RaspberryPi:
 
     def spi_writebyte2(self, data):
         self.SPI.writebytes2(data)
+    
+    def is_ready(self):
+        mode = self.GPIO.getmode()
+        return mode is not None
 
     def module_init(self):
         self.GPIO.setmode(self.GPIO.BCM)
@@ -124,6 +128,10 @@ class JetsonNano:
 
     def spi_writebyte(self, data):
         self.SPI.SYSFS_software_spi_transfer(data[0])
+    
+    def is_ready(self):
+        mode = self.GPIO.getmode()
+        return mode is not None
 
     def module_init(self):
         self.GPIO.setmode(self.GPIO.BCM)
