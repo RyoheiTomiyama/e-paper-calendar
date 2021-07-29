@@ -1,3 +1,4 @@
+from weather import Weather
 import pytz
 import calendar as cal
 from datetime import date, datetime
@@ -244,7 +245,7 @@ class Draw:
         month_font_name = 'number'
         month_font_size = 24
         self.draw_black.multiline_text(
-            (wrap_padding + 5, wrap_padding + 8),
+            (wrap_padding + 5, wrap_padding + 18),
             month_text,
             font = self.get_font(month_font_name, month_font_size),
             fill = COLORS['black']
@@ -254,7 +255,7 @@ class Draw:
         day_font_name = 'number'
         day_font_size = 50
         self.draw_black.multiline_text(
-            (month_textsize[0] + 10, wrap_padding),
+            (month_textsize[0] + 10, wrap_padding + 10),
             day_text,
             font = self.get_font(day_font_name, day_font_size),
             fill = COLORS['black']
@@ -264,22 +265,46 @@ class Draw:
         week_font_name = 'number'
         week_font_size = 24
         self.draw_black.multiline_text(
-            (month_textsize[0] + day_textsize[0] + 15, wrap_padding + 26),
+            (month_textsize[0] + day_textsize[0] + 15, wrap_padding + 36),
             week_text,
             font = self.get_font(week_font_name, week_font_size),
             fill = COLORS['black']
         )
     
-    def draw_weather(self):
+    def draw_weather(self, weather: Weather):
         font_name = 'number'
-        temp_text = '28°'
-        temp_font_size = 80
+        temp_text = f'{weather.temp.current}°'
+        temp_font_size = 54
         self.draw_black.multiline_text(
-            (175, 88),
+            (175, 110),
             temp_text,
             font = self.get_font(font_name, temp_font_size),
             fill = COLORS['black'],
         )
+
+        info_font_size = 18
+        info_text = f'{weather.temp.min}°/{weather.temp.max}°'
+        self.draw_black.multiline_text(
+            (206, 55),
+            info_text,
+            font = self.get_font(font_name, info_font_size),
+            fill = COLORS['black'],
+        )
+        temp_img = Image.open('./assets/images/temp.jpg', )
+        self.img_black.paste(temp_img, (177, 54))
+        info_text = f'{weather.humidity}%'
+        self.draw_black.multiline_text(
+            (206, 25),
+            info_text,
+            font = self.get_font(font_name, info_font_size),
+            fill = COLORS['black'],
+        )
+        temp_img = Image.open('./assets/images/humidity.jpg', )
+        self.img_black.paste(temp_img, (177, 23))
+
+        weather_img = Image.open(f'./assets/images/{weather.icon}.jpg', )
+        self.img_black.paste(weather_img, (27, 85))
+
 
     def draw_separate_line(self):
         self.draw_black.line(
