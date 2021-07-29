@@ -153,6 +153,13 @@ class Draw:
                 font = self.get_font('number', 12),
                 fill = color,
             )
+            if color == COLORS['red']:
+                self.draw_black.multiline_text(
+                    (x_start[i] + w_pad + wrap_padding, 270),
+                    text,
+                    font = self.get_font('number', 12),
+                    fill = COLORS['black'],
+                )
 
         # show the dates
         for h, row in enumerate(calendar):
@@ -176,6 +183,14 @@ class Draw:
                     font = self.get_font('number', 16),
                     fill = color
                 )
+                if color == COLORS['red']:
+                    self.draw_black.multiline_text(
+                        (x_start[i] + w_pad + wrap_padding, 300 + 30 * h),
+                        str(text),
+                        font = self.get_font('number', 16),
+                        fill = COLORS['black']
+                    )
+
 
     def draw_schedules(self, schedules):
         wrap_padding = 5
