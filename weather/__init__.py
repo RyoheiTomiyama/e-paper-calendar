@@ -7,8 +7,8 @@ load_dotenv()
 
 BASE_URL = 'https://api.openweathermap.org/data/2.5/onecall'
 API_KEY = os.getenv('OPEN_WEATHER_API_KEY')
-LAT = 36.5
-LONG = 137.8667
+LAT = os.getenv('LATITUDE')
+LONG = os.getenv('LONGITUDE')
 
 class Temp:
   current: Decimal
