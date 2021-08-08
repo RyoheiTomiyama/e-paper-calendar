@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-from waveshare import output_epaper
 from weather import Weather
 from draw import Draw
 from google_calendar import GoogleCalendar
+
+# 開発中に画像を書き出してテストしたいときは、コメントアウトを外す
+# IS_LOCAL = True
 
 def main():
     google_calendar = GoogleCalendar()
@@ -19,9 +21,11 @@ def main():
     draw.draw_today()
     draw.draw_weather(weather)
 
-    # draw.save_image()
-
-    output_epaper(draw.img_black, draw.img_red)
+    if 'IS_LOCAL' in globals():
+        draw.save_image()
+    else:
+        from waveshare import output_epaper
+        output_epaper(draw.img_black, draw.img_red)
 
 
 if __name__ == '__main__':
