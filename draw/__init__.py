@@ -83,7 +83,7 @@ class Draw:
         textsize = self.get_textsize(text, font_name, font_size)
         return (height - rect[1] + textsize[1]) // 2
 
-    def save_image(self, file_name: str = 'text'):
+    def save_image(self, file_name: str = f'{SIZE[0]}x{SIZE[1]}'):
         saved_image = Image.new('RGB', SIZE, COLORS['white'])
         for x in range(SIZE[0]):
             for y in range(SIZE[1]):
@@ -93,7 +93,7 @@ class Draw:
                     saved_image.putpixel((x, y), pixel_black)
                 if pixel_red[0] != 255 or pixel_red[1] != 255 or pixel_red[2] != 255:
                     saved_image.putpixel((x, y), pixel_red)
-        file_path = f'./{file_name}.bmp'
+        file_path = f'./output/{file_name}.bmp'
         saved_image.save(file_path, 'bmp')
     
     def convert_multiline_text(self, text: str, font_name: str, font_size: int, width):
